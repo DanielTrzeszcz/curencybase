@@ -1,31 +1,27 @@
-import PropTypes from 'prop-types';
-import { convertUSDToPLN } from './../../utils/convertUSDToPLN';
-import { convertPLNToUSD } from './../../utils/convertPLNToUSD';
-import { formatAmountInCurrency } from './../../utils/formatAmountInCurrency';
-import { useMemo } from 'react';
 import styles from './ResultBox.module.scss';
 
 const ResultBox = ({ from, to, amount }) => {
+  const rates = {
+    PLN: 1,
+    USD: 3.5,
+  };
 
-  const convertedAmount = useMemo(() => {
-    if(from === 'USD' && to === 'PLN') return convertUSDToPLN(amount);
-    if(from === 'PLN' && to === 'USD') return convertPLNToUSD(amount);
-    return formatAmountInCurrency(amount, from);
-  }, [from, to, amount]);
+  if (amount < 0) {
+    return <div data-testid="result-box">Wrong value…</div>;
+  }
 
-  const formattedAmount = useMemo(() => formatAmountInCurrency(amount, from), [amount, from]);
+  const fromRate = rates[from];
+  const toRate = rates[to];
+  const result = ((amount * fromRate) / toRate).toFixed(2);
+
+  const format = (currency, value) =>
+    currency === 'USD' ? `$${Number(value).toFixed(2)}` : `PLN ${Number(value).toFixed(2)}`;
 
   return (
-    <div className={styles.result}>
-      {formattedAmount} = {convertedAmount}
+    <div data-testid="result-box">
+      {format(from, amount)} = {format(to, result)}
     </div>
   );
 };
-
-ResultBox.propTypes = {
-  from: PropTypes.string.isRequired,
-  to: PropTypes.string.isRequired,
-  amount: PropTypes.number.isRequired,
-}
 
 export default ResultBox;
